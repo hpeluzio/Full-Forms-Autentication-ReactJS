@@ -11,13 +11,15 @@ function App() {
         Formulario Cadastro
       </Typography>
       <FormularioCadastro
-        aoEnviar={(dados) => {
-          console.log("dados: ", dados)
-        }}
+        aoEnviar={aoEnviar}
         validarCPF={validarCPF}
       />
     </Container>
   )
+}
+
+function aoEnviar(dados)  {
+  console.log("dados: ", dados)
 }
 
 function validarCPF(cpf) {
