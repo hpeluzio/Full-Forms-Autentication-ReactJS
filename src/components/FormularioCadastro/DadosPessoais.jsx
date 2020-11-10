@@ -1,34 +1,63 @@
-import React, { useState } from "react"
-import { Button, TextField, Switch, FormControlLabel } from "@material-ui/core"
+import React, { useState, useContext } from 'react'
+import { Button, TextField, Switch, FormControlLabel } from '@material-ui/core'
+import ValidacoesCadastro from '../../contexts/ValidacoesCadastro'
 
-function DadosPessoais({ aoEnviar, validarCPF }) {
-  const [nome, setNome] = useState("")
-  const [sobrenome, setSobrenome] = useState("")
-  const [cpf, setCpf] = useState("")
+function DadosPessoais({ aoEnviar }) {
+  const [nome, setNome] = useState('')
+  const [sobrenome, setSobrenome] = useState('')
+  const [cpf, setCpf] = useState('')
   const [promocoes, setPromocoes] = useState(true)
   const [novidades, setNovidades] = useState(true)
-  const [erros, setErros] = useState({cpf: {valido: true, texto: ""}})
+  const [erros, setErros] = useState({
+    cpf: { valido: true, texto: '' },
+    nome: { valido: true, texto: '' },
+  })
+
+  const validacoes = useContext(ValidacoesCadastro)
+
+  function validarCampos(event) {
+    const { name, value } = event.target
+    console.log(name, ' - ', value)
+    const novoEstado = { ...erros }
+    console.log(novoEstado)
+    novoEstado[name] = validacoes[name](value)
+
+    setErros(novoEstado)
+  }
+
+  function possoEnviar() {
+    for (let campo in erros) {
+      if (!erros[campo].valido) return false
+    }
+    return true
+  }
 
   return (
     <React.StrictMode>
       <form
         onSubmit={(event) => {
           event.preventDefault()
-          aoEnviar({ nome, sobrenome, cpf, promocoes, novidades })
+          if (possoEnviar())
+            aoEnviar({ nome, sobrenome, cpf, promocoes, novidades })
           // console.log({nome, sobrenome, cpf, promocoes, novidades});
         }}
       >
         <TextField
+          name="nome"
           value={nome}
           id="nome"
           label="Nome"
           variant="outlined"
           fullWidth
           margin="normal"
+          required
           onChange={(event) => {
             // console.log(event.target.value)
             setNome(event.target.value)
           }}
+          onBlur={validarCampos}
+          error={!erros.nome.valido}
+          helperText={erros.nome.texto}
         />
         <TextField
           value={sobrenome}
@@ -36,6 +65,7 @@ function DadosPessoais({ aoEnviar, validarCPF }) {
           label="Sobrenome"
           variant="outlined"
           fullWidth
+          required
           margin="normal"
           onChange={(event) => {
             // console.log(event.target.value)
@@ -43,6 +73,7 @@ function DadosPessoais({ aoEnviar, validarCPF }) {
           }}
         />
         <TextField
+          name="cpf"
           value={cpf}
           type="number"
           id="cpf"
@@ -56,10 +87,8 @@ function DadosPessoais({ aoEnviar, validarCPF }) {
           }}
           error={!erros.cpf.valido}
           helperText={erros.cpf.texto}
-          onBlur={(e) => {
-            const ehValido = validarCPF(e.target.value)
-            setErros({cpf: ehValido})
-          }}
+          onBlur={validarCampos}
+          required
         />
         <FormControlLabel
           label="Promoções"
@@ -90,7 +119,7 @@ function DadosPessoais({ aoEnviar, validarCPF }) {
         />
 
         <Button variant="contained" color="primary" type="submit">
-          Cadastrar
+          Próximo
         </Button>
       </form>
     </React.StrictMode>

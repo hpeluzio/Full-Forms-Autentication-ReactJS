@@ -1,32 +1,57 @@
-import React, { useState } from "react"
-import {
-  Button,
-  TextField,
-  Switch,
-  FormControlLabel,
-  Typography,
-} from "@material-ui/core"
-import DadosPessoais from "./DadosPessoais"
-import DadosUsuario from "./DadosUsuario"
-import DadosEntrega from "./DadosEntrega"
+import React, { useEffect, useState } from 'react'
 
-function FormularioCadastro({ aoEnviar, validarCPF }) {
-  const [etapaAtual, setEtapaAtual] = useState(1)
+import DadosPessoais from './DadosPessoais'
+import DadosUsuario from './DadosUsuario'
+import DadosEntrega from './DadosEntrega'
+import { Step, StepLabel, Stepper, Typography } from '@material-ui/core'
 
-  function formularioAtual(etapa) {
-    switch (etapa) {
-      case 0:
-        return <DadosUsuario />
-      case 1:
-        return <DadosPessoais aoEnviar={aoEnviar} validarCPF={validarCPF} />
-      case 2:
-        return <DadosEntrega />
-      default:
-        return <Typography>Erro</Typography>
-    }
+function FormularioCadastro({ aoEnviar }) {
+  //
+  const [etapaAtual, setEtapaAtual] = useState(0)
+  const [dadosColetados, setDadosColetados] = useState({})
+  useEffect(() => {
+    // console.log('dadosColetados useEffect:', dadosColetados)
+    aoEnviar(dadosColetados)
+  })
+
+  const formularios = [
+    <DadosUsuario aoEnviar={coletarDados} />,
+    <DadosPessoais aoEnviar={coletarDados} />,
+    <DadosEntrega aoEnviar={coletarDados} />,
+    <Typography variant="h5" align="center">
+      Obrigado pelo cadastro!
+    </Typography>,
+  ]
+
+  function coletarDados(dados) {
+    setDadosColetados({ ...dadosColetados, ...dados })
+    // console.log('dadosColetados', dadosColetados)
+    proximo()
   }
 
-  return <>{formularioAtual(etapaAtual)}</>
+  function proximo() {
+    setEtapaAtual(etapaAtual + 1)
+  }
+
+  return (
+    <>
+      <Stepper activeStep={etapaAtual}>
+        <Step>
+          <StepLabel>Login</StepLabel>
+        </Step>
+        <Step>
+          <StepLabel>Pessoal</StepLabel>
+        </Step>
+        <Step>
+          <StepLabel>Entrega</StepLabel>
+        </Step>
+        <Step>
+          <StepLabel>Finalização</StepLabel>
+        </Step>
+      </Stepper>
+      {formularios[etapaAtual]}
+    </>
+  )
 }
 
 export default FormularioCadastro
